@@ -1,13 +1,79 @@
-customer = Customer(name="MHP")
+from sqlalchemy import text
 
-project = Project(
-    title="API Improvements",
-    document=document,
-    embedding=embedding
-)
+from app.ai_client import AIClient
+from app.database import engine
 
-customer.projects.append(project)
+ai = AIClient()
 
-session.add(customer)
+document = """
+Customer: MHP
 
-session.commit()
+Project: API Improvements
+
+Summary:
+Customer requested additional fields for the Users API endpoint.
+
+Tasks:
+- Add customerType
+- Add startDate
+- Update endpoint documentation
+
+Notes:
+Maintain backwards compatibility.
+"""
+
+embedding = ai.embed(document)
+
+print(f"Embedding dimensions: {len(embedding)}")
+
+with engine.begin() as conn:
+
+    conn.execute(
+        text("""
+            INSERT INTO customers(name)
+            VALUES (:name)
+            ON CONFLICT (name)
+            DO NOTHING
+        """),
+        {
+            "name": "MHP"
+        }
+    )
+
+    customer_id = conn.execute(
+        text("""
+            SELECT id
+            FROM customers
+            WHERE name = :name
+        """),
+        {
+            "name": "MHP"
+        }
+    ).scalar_one()
+
+    conn.execute(
+        text("""
+            INSERT INTO projects
+            (
+                customer_id,
+                title,
+                document,
+                embedding
+            )
+            VALUES
+            (
+                :customer_id,
+                :title,
+                :document,
+                :embedding
+            )
+        """),
+        {
+            "customer_id": customer_id,
+            "title": "API Improvements",
+            "document": document,
+            "embedding": embedding
+        }
+    )
+
+print("Project stored successfully!")
