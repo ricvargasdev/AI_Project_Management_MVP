@@ -4,6 +4,9 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
 from app.database import Base
+from typing import TYPE_CHECKING, List
+if TYPE_CHECKING:
+    from app.models.project import Project
 
 
 class Customer(Base):
@@ -17,7 +20,7 @@ class Customer(Base):
         unique=True
     )
 
-    projects = relationship(
+    projects: Mapped[List["Project"]] = relationship(
         "Project",
         back_populates="customer"
     )

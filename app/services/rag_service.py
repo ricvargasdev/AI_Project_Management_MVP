@@ -2,7 +2,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.project import Project
-from app.services.ai_client import AIClient
 
 
 class RAGService:
@@ -10,7 +9,6 @@ class RAGService:
     def __init__(self, db: Session):
 
         self.db = db
-        self.ai = AIClient()
 
     def ask(self, customer: str, question: str):
 

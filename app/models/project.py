@@ -3,12 +3,16 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
+from sqlalchemy import Text
 
 from pgvector.sqlalchemy import Vector
 
 from app.database import Base
 
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from app.models.customer import Customer
 class Project(Base):
 
     __tablename__ = "projects"
@@ -23,13 +27,15 @@ class Project(Base):
         String(255)
     )
 
-    document: Mapped[str]
+    document: Mapped[str] = mapped_column(
+        Text
+    )
 
     embedding: Mapped[list[float]] = mapped_column(
         Vector(768)
     )
 
-    customer = relationship(
+    customer: Mapped["Customer"] = relationship(
         "Customer",
         back_populates="projects"
     )
