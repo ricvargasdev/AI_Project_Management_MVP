@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.customer import Customer
+from app.schemas.customer import CustomerResponse
 
 router = APIRouter(
     prefix="/customers",
@@ -12,7 +13,10 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get(
+    "",
+    response_model=list[CustomerResponse]
+)
 def get_customers(
     db: Session = Depends(get_db)
 ):
