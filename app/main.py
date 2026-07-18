@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.api.customers import router as customer_router
 from app.api.projects import router as project_router
+from app.api.questions import router as question_router
 
 app = FastAPI(
     title="AI Project Management MVP",
@@ -10,6 +11,7 @@ app = FastAPI(
 
 app.include_router(customer_router)
 app.include_router(project_router)
+app.include_router(question_router)
 
 @app.get("/")
 def root():

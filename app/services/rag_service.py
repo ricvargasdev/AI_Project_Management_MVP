@@ -99,65 +99,74 @@ class RAGService:
     
     def build_prompt(
         self,
+        customer_name: str,
         projects,
-        question
+        question: str
     ):
-        context = ""
+
+        project_history = ""
+
         for project in projects:
 
-            context += f"""
-    Project
-    -------
+            project_history += f"""
+        Project Title:
+        {project.title}
 
-    Title:
-    {project.title}
+        Project Details:
+        {project.document}
 
-    Description:
-    {project.document}
+        ----------------------------------------
+        """
 
-    """
+            prompt = f"""
+        You are an experienced Technical Project Manager.
 
-        return f"""
-    You are a Senior Project Manager.
+        You answer questions ONLY using the project history below.
 
-    You answer questions using ONLY the supplied project history.
+        Rules:
 
-    Rules
+        1. Never invent information.
+        2. Never use external knowledge.
+        3. If the answer cannot be found, reply exactly:
+        "I couldn't find that information in the customer's project history."
+        4. Mention the project title whenever possible.
+        5. Keep your answer concise.
 
-    1. Never invent or make up information.
+        Customer:
+        {customer_name}
 
-    2. Never mention projects that are not in the context.
+        ========================================
 
-    3. If you don't know the answer, say:
+        PROJECT HISTORY
 
-    "I couldn't find that information."
+        {project_history}
 
-    4. Mention the project title whenever possible.
+        ========================================
 
-    5. Be concise.
+        QUESTION
 
-    ----------------------------
+        {question}
+        """
 
-    PROJECT HISTORY
-
-    {context}
-
-    ----------------------------
-
-    QUESTION
-
-    {question}
-    """
+        return prompt
 
     def answer_question(
-        customer_name,
-        question
+        self,
+        customer_name: str,
+        question: str
     ):
+        projects = self.retrieve_projects(
+            customer_name=customer_name,
+            question=question
+        )
 
-        projects = self.retrieve_projects(...)
+        if not projects:
+            return "I couldn't find any projects for that customer."
 
-        prompt = self.build_prompt(...)
+        prompt = self.build_prompt(
+            customer_name=customer_name,
+            projects=projects,
+            question=question
+        )
 
-        answer = self.ai.chat(prompt)
-
-        return answer
+        return self.ai.chat(prompt)
